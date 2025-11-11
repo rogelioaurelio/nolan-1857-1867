@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Diagrama de Nolan - Gran Década Nacional (1857–1867)</title>
+  <style>
+    body { font-family: "Montserrat", sans-serif; max-width: 800px; margin: auto; padding: 20px; }
+    h1 { text-align: center; }
+    .question { margin-bottom: 10px; }
+    .likert label { margin-right: 10px; }
+    #graph { border: 1px solid #aaa; background: #fafafa; margin-top: 30px; }
+  </style>
+</head>
+<body>
+  <h1>🧭 Diagrama de Nolan Histórico (1857–1867)</h1>
+  <p>Responde del 1 al 5 qué tanto estás de acuerdo con las siguientes afirmaciones:</p>
+
+  <form id="quizForm">
+    <h2>Eje Y – Libertades civiles y laicidad</h2>
+    <div id="y-questions"></div>
+
+    <h2>Eje X – Economía y modelo de Estado</h2>
+    <div id="x-questions"></div>
+
+    <button type="button" onclick="calculate()">Ver resultado</button>
+  </form>
+
+  <h2>Tu resultado:</h2>
+  <p id="result"></p>
+
+  <canvas id="graph" width="400" height="400"></canvas>
+
+  <script>
+    const yItems = [
+      "El Estado debe nacionalizar las propiedades de la Iglesia.",
+      "Todos deben poder elegir libremente su religión.",
+      "La prensa debe poder criticar al gobierno o a la Iglesia sin censura.",
+      "El Estado, no la Iglesia, debe registrar nacimientos y matrimonios.",
+      "Los cambios sociales deben ser rápidos, no graduales.",
+      "La soberanía nacional está por encima de toda ideología extranjera.",
+      "Todas las personas son iguales ante la ley, sin fueros ni privilegios.",
+      "La Iglesia no debe intervenir en los asuntos públicos.",
+      "Es mejor una república democrática que una monarquía ordenada.",
+      "La Constitución debe respetarse, aunque pueda reformarse."
+    ];
+
+    const xItems = [
+      "Hay que proteger los productos nacionales con impuestos a las importaciones.",
+      "Deben existir impuestos progresivos a la riqueza.",
+      "Es más importante impulsar la industria que el comercio exterior.",
+      "Se debe permitir el libre comercio para desarrollar la economía.",
+      "No debe existir un impuesto único universal.",
+      "Es válido comprar bienes desamortizados de la Iglesia.",
+      "El gobierno no debe ser excesivamente austero, necesita gastar.",
+      "Es mejor aliarse con Estados Unidos que con Europa.",
+      "Es más importante el uso social de la propiedad que su carácter individual.",
+      "Es válido repartir propiedades de quienes no pagan impuestos."
+    ];
+
+    function createQuestions(list, containerId, prefix) {
+      const container = document.getElementById(containerId);
+      list.forEach((q, i) => {
+        const div = document.createElement("div");
+        div.className = "question";
+        div.innerHTML = `<p>${i+1}. ${q}</p>
+          <div class="likert">
+            ${[1,2,3,4,5].map(v =>
+              `<label><input type="radio" name="${prefix}${i}" value="${v}" required> ${v}</label>`
+            ).join("")}
+          </div>`;
+        container.appendChild(div);
+      });
+    }
+
+    createQuestions(yItems, "y-questions", "y");
+    createQuestions(xItems, "x-questions", "x");
+
+    function calculate() {
+      let ySum = 0, xSum = 0;
+      for (let i=0; i<10; i++) {
+        ySum += parseInt(document.querySelector(`input[name='y${i}']:checked`).value);
+        xSum += parseInt(document.querySelector(`input[name='x${i}']:checked`).value);
+      }
+      const yScore = ((ySum - 5) / 20) * 10;
+      const xScore = ((xSum - 5) / 20) * 10;
+      document.getElementById("result").innerText =
+        `Tu posición: Eje Y = ${yScore.toFixed(1)}, Eje X = ${xScore.toFixed(1)}`;
+
+      drawGraph(xScore, yScore);
+    }
+
+    function drawGraph(x, y) {
+      const c = document.getElementById("graph");
+      const ctx = c.getContext("2d");
+      ctx.clearRect(0, 0, c.width, c.height);
+      ctx.strokeStyle = "#333";
+      ctx.beginPath();
+      ctx.moveTo(200, 0); ctx.lineTo(200, 400); // eje Y
+      ctx.moveTo(0, 200); ctx.lineTo(400, 200); // eje X
+      ctx.stroke();
+      ctx.font = "12px sans-serif";
+      ctx.fillText("Laicidad ↑", 210, 15);
+      ctx.fillText("Autoridad ↓", 210, 390);
+      ctx.fillText("← Intervención", 10, 190);
+      ctx.fillText("Mercado →", 310, 190);
+      // punto del alumno
+      const px = 200 + (x - 5) * 20;
+      const py = 200 - (y - 5) * 20;
+      ctx.fillStyle = "red";
+      ctx.beginPath();
+      ctx.arc(px, py, 6, 0, 2 * Math.PI);
+      ctx.fill();
+    }
+  </script>
+</body>
+</html>
