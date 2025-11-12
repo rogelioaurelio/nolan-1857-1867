@@ -1,116 +1,269 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <title>Diagrama de Nolan - Gran Década Nacional (1857–1867)</title>
-  <style>
-    body { font-family: "Montserrat", sans-serif; max-width: 800px; margin: auto; padding: 20px; }
-    h1 { text-align: center; }
-    .question { margin-bottom: 10px; }
-    .likert label { margin-right: 10px; }
-    #graph { border: 1px solid #aaa; background: #fafafa; margin-top: 30px; }
-  </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Diagrama de Nolan histórico (1857–1867) — CCH Naucalpan</title>
+<style>
+  :root{
+    --ink:#0f172a; --muted:#64748b;
+    --line:#cbd5e1; --grid:#eef2f7; --panel:#f8fafc;
+    --pt:#1e88e5; --me:#e11d48;
+  }
+  body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Arial,Helvetica,sans-serif;
+       color:var(--ink); background:#fff; margin:0 auto; max-width:1100px; padding:28px}
+  h1{margin:0 0 10px}
+  #presentacion{border:1px solid var(--line); border-left:6px solid #7a1f1f; border-radius:14px;
+    padding:16px 20px; background:linear-gradient(180deg,#fff,#fafafa); margin:8px 0 20px}
+  #graph{display:block; width:900px; height:900px; margin:12px auto; background:var(--panel);
+    border:1px solid var(--line); border-radius:16px; box-shadow:0 8px 24px rgba(2,6,23,.05)}
+  .legend{display:flex; gap:16px; align-items:center; margin:8px 0}
+  .dot{width:12px;height:12px;border-radius:50%}
+  .me{background:var(--me)} .hx{background:var(--pt)}
+  .row{display:grid; grid-template-columns:1fr 1fr; gap:18px}
+  @media (max-width:1000px){#graph{width:100%;height:auto;aspect-ratio:1/1}}
+  .question{margin:8px 0}
+  .likert label{margin-right:10px; color:var(--muted)}
+  .btns{display:flex; flex-wrap:wrap; gap:10px; align-items:center; margin-top:10px}
+  button{padding:10px 14px; border:1px solid var(--line); border-radius:12px; cursor:pointer}
+  .primary{background:#111;color:#fff}
+  .ghost{background:#fff;color:#111}
+  .note{color:var(--muted)}
+</style>
 </head>
 <body>
-  <h1>🧭 Diagrama de Nolan Histórico (1857–1867)</h1>
-  <p>Responde del 1 al 5 qué tanto estás de acuerdo con las siguientes afirmaciones:</p>
+<h1>🧭 Diagrama de Nolan histórico (1857–1867)</h1>
 
-  <form id="quizForm">
-    <h2>Eje Y – Libertades civiles y laicidad</h2>
-    <div id="y-questions"></div>
+<section id="presentacion">
+  <p>
+    Este recurso interactivo apoya el curso de <strong>Historia de México II</strong> del
+    <strong>Colegio de Ciencias y Humanidades, Plantel Naucalpan (CCH Naucalpan)</strong>,
+    para comprender el <strong>pensamiento político en la Gran Década Nacional (1857–1867)</strong>.
+  </p>
+  <p>
+    El diagrama ubica posturas según dos dimensiones:
+    <br>🡱 <strong>Eje Y:</strong> libertades civiles y laicidad ↕ vs. autoridad y confesionalidad.
+    <br>🡲 <strong>Eje X:</strong> libertad económica y mercado ↔ vs. control estatal y privilegios corporativos.
+  </p>
+  <p>
+    Tras el cuestionario, podrás comparar tu posición con la de <strong>personajes históricos del siglo XIX</strong>
+    (liberales y conservadores). Favorece el análisis crítico de la <em>Constitución de 1857</em>,
+    la <em>Reforma</em> y el <em>Segundo Imperio</em>.
+  </p>
+  <p style="text-align:right;color:#64748b"><em>Prof. Rogelio Aurelio Rojas Reyes</em></p>
+</section>
 
-    <h2>Eje X – Economía y modelo de Estado</h2>
-    <div id="x-questions"></div>
+<div class="legend">
+  <span><i class="dot me"></i> Tu posición</span>
+  <span><i class="dot hx"></i> Personajes históricos</span>
+</div>
 
-    <button type="button" onclick="calculate()">Ver resultado</button>
-  </form>
+<form id="quizForm">
+  <div class="row">
+    <section>
+      <h3>Eje Y – Libertades civiles y laicidad</h3>
+      <div id="y-questions"></div>
+    </section>
+    <section>
+      <h3>Eje X – Economía y modelo de Estado</h3>
+      <div id="x-questions"></div>
+    </section>
+  </div>
+  <div class="btns">
+    <button type="button" class="primary" onclick="calculate()">Ver resultado</button>
+    <button type="button" class="ghost" onclick="resetForm()">Borrar respuestas</button>
+    <button type="button" class="ghost" onclick="downloadPNG()">Descargar PNG</button>
+    <span class="note">Marca del 1 (en desacuerdo) al 5 (de acuerdo).</span>
+  </div>
+</form>
 
-  <h2>Tu resultado:</h2>
-  <p id="result"></p>
+<h3>Tu resultado</h3>
+<p id="result" class="note">Contesta todo y presiona “Ver resultado”.</p>
 
-  <canvas id="graph" width="400" height="400"></canvas>
+<canvas id="graph" width="900" height="900"></canvas>
 
-  <script>
-    const yItems = [
-      "El Estado debe nacionalizar las propiedades de la Iglesia.",
-      "Todos deben poder elegir libremente su religión.",
-      "La prensa debe poder criticar al gobierno o a la Iglesia sin censura.",
-      "El Estado, no la Iglesia, debe registrar nacimientos y matrimonios.",
-      "Los cambios sociales deben ser rápidos, no graduales.",
-      "La soberanía nacional está por encima de toda ideología extranjera.",
-      "Todas las personas son iguales ante la ley, sin fueros ni privilegios.",
-      "La Iglesia no debe intervenir en los asuntos públicos.",
-      "Es mejor una república democrática que una monarquía ordenada.",
-      "La Constitución debe respetarse, aunque pueda reformarse."
-    ];
+<script>
+/* ===================== PREGUNTAS ===================== */
+const yItems = [
+  "El Estado debe nacionalizar bienes de la Iglesia.",
+  "Todos deben poder elegir libremente su religión.",
+  "La prensa puede criticar al gobierno o a la Iglesia sin censura.",
+  "El Estado, no la Iglesia, debe registrar nacimientos y matrimonios.",
+  "Los cambios sociales deben ser rápidos, no graduales.",
+  "La soberanía nacional prevalece sobre alianzas ideológicas extranjeras.",
+  "Igualdad ante la ley: sin fueros ni privilegios.",
+  "Aunque la mayoría sea católica, la Iglesia no debe intervenir en lo público.",
+  "Es preferible una república democrática a una monarquía ordenada.",
+  "La Constitución debe respetarse, aunque pueda reformarse."
+];
+const xItems = [
+  "Proteger la producción nacional con aranceles a importaciones.",
+  "Impuestos progresivos a la riqueza.",
+  "Impulsar la industria antes que el comercio exterior.",
+  "Permitir el libre comercio para desarrollar la economía.",
+  "No a un impuesto único universal igual para todos.",
+  "Es válido comprar bienes desamortizados de la Iglesia.",
+  "El gobierno no debe ser excesivamente austero.",
+  "Es mejor aliarse con EE. UU. que con Europa.",
+  "Importa más la función social de la propiedad que su carácter individual.",
+  "Es válido repartir propiedades de quienes no cumplen obligaciones fiscales."
+];
+function makeBlock(list, id, pref){
+  const c=document.getElementById(id);
+  list.forEach((q,i)=>{
+    const div=document.createElement('div');
+    div.className='question';
+    div.innerHTML=`<p>${i+1}. ${q}</p>
+      <div class="likert">
+        ${[1,2,3,4,5].map(v=>`<label><input type="radio" name="${pref}${i}" value="${v}" required> ${v}</label>`).join('')}
+      </div>`;
+    c.appendChild(div);
+  });
+}
+makeBlock(yItems,'y-questions','y');
+makeBlock(xItems,'x-questions','x');
 
-    const xItems = [
-      "Hay que proteger los productos nacionales con impuestos a las importaciones.",
-      "Deben existir impuestos progresivos a la riqueza.",
-      "Es más importante impulsar la industria que el comercio exterior.",
-      "Se debe permitir el libre comercio para desarrollar la economía.",
-      "No debe existir un impuesto único universal.",
-      "Es válido comprar bienes desamortizados de la Iglesia.",
-      "El gobierno no debe ser excesivamente austero, necesita gastar.",
-      "Es mejor aliarse con Estados Unidos que con Europa.",
-      "Es más importante el uso social de la propiedad que su carácter individual.",
-      "Es válido repartir propiedades de quienes no pagan impuestos."
-    ];
+/* ===================== DIBUJO ===================== */
+const C=document.getElementById('graph'), ctx=C.getContext('2d');
+const W=C.width, H=C.height, cx=W/2, cy=H/2;
+const OUTER=90;                         // margen exterior (compacto)
+const r=Math.min(W,H)/2 - OUTER;        // radio del rombo
+const V={top:{x:cx,y:cy-r}, right:{x:cx+r,y:cy}, bottom:{x:cx,y:cy+r}, left:{x:cx-r,y:cy}};
 
-    function createQuestions(list, containerId, prefix) {
-      const container = document.getElementById(containerId);
-      list.forEach((q, i) => {
-        const div = document.createElement("div");
-        div.className = "question";
-        div.innerHTML = `<p>${i+1}. ${q}</p>
-          <div class="likert">
-            ${[1,2,3,4,5].map(v =>
-              `<label><input type="radio" name="${prefix}${i}" value="${v}" required> ${v}</label>`
-            ).join("")}
-          </div>`;
-        container.appendChild(div);
-      });
-    }
+function diamond(){ctx.beginPath();
+  ctx.moveTo(V.top.x,V.top.y); ctx.lineTo(V.right.x,V.right.y);
+  ctx.lineTo(V.bottom.x,V.bottom.y); ctx.lineTo(V.left.x,V.left.y); ctx.closePath();}
 
-    createQuestions(yItems, "y-questions", "y");
-    createQuestions(xItems, "x-questions", "x");
+function project(x,y){ // normalizado -1..1 -> rombo
+  const L1=Math.max(1,Math.abs(x)+Math.abs(y));
+  return {px:cx+(x/L1)*r, py:cy-(y/L1)*r};
+}
+function roundRect(x,y,w,h,r){ctx.beginPath();
+  ctx.moveTo(x+r,y);ctx.lineTo(x+w-r,y);ctx.quadraticCurveTo(x+w,y,x+w,y+r);
+  ctx.lineTo(x+w,y+h-r);ctx.quadraticCurveTo(x+w,y+h,x+w-r,y+h);
+  ctx.lineTo(x+r,y+h);ctx.quadraticCurveTo(x,y+h,x,y+h-r);
+  ctx.lineTo(x,y+r);ctx.quadraticCurveTo(x,y,x+r,y);ctx.closePath();}
 
-    function calculate() {
-      let ySum = 0, xSum = 0;
-      for (let i=0; i<10; i++) {
-        ySum += parseInt(document.querySelector(`input[name='y${i}']:checked`).value);
-        xSum += parseInt(document.querySelector(`input[name='x${i}']:checked`).value);
-      }
-      const yScore = ((ySum - 5) / 20) * 10;
-      const xScore = ((xSum - 5) / 20) * 10;
-      document.getElementById("result").innerText =
-        `Tu posición: Eje Y = ${yScore.toFixed(1)}, Eje X = ${xScore.toFixed(1)}`;
+function base(){
+  ctx.clearRect(0,0,W,H);
+  // rejilla
+  ctx.strokeStyle="#eef2f7";
+  for(let t=0.2;t<1;t+=0.2){
+    const s=1-t; ctx.beginPath();
+    ctx.moveTo(cx,cy-r*s); ctx.lineTo(cx+r*s,cy); ctx.lineTo(cx,cy+r*s); ctx.lineTo(cx-r*s,cy);
+    ctx.closePath(); ctx.stroke();
+  }
+  // rombo
+  ctx.strokeStyle="#94a3b8"; ctx.lineWidth=2; diamond(); ctx.stroke();
+  // ejes
+  ctx.strokeStyle="#cbd5e1"; ctx.lineWidth=1.5;
+  ctx.beginPath(); ctx.moveTo(V.left.x,V.left.y); ctx.lineTo(V.right.x,V.right.y); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(V.top.x,V.top.y); ctx.lineTo(V.bottom.x,V.bottom.y); ctx.stroke();
 
-      drawGraph(xScore, yScore);
-    }
+  // categorías de cuadrante (centradas)
+  ctx.fillStyle="#374151"; ctx.font="600 16px system-ui"; ctx.textAlign="center";
+  const q=r*0.30;
+  ctx.fillText("Liberal moderado",        cx-q, cy-q);
+  ctx.fillText("Liberal radical",         cx+q, cy-q);
+  ctx.fillText("Conservador corporativo", cx-q, cy+q);
+  ctx.fillText("Conservador ilustrado",   cx+q, cy+q);
 
-    function drawGraph(x, y) {
-      const c = document.getElementById("graph");
-      const ctx = c.getContext("2d");
-      ctx.clearRect(0, 0, c.width, c.height);
-      ctx.strokeStyle = "#333";
-      ctx.beginPath();
-      ctx.moveTo(200, 0); ctx.lineTo(200, 400); // eje Y
-      ctx.moveTo(0, 200); ctx.lineTo(400, 200); // eje X
-      ctx.stroke();
-      ctx.font = "12px sans-serif";
-      ctx.fillText("Laicidad ↑", 210, 15);
-      ctx.fillText("Autoridad ↓", 210, 390);
-      ctx.fillText("← Intervención", 10, 190);
-      ctx.fillText("Mercado →", 310, 190);
-      // punto del alumno
-      const px = 200 + (x - 5) * 20;
-      const py = 200 - (y - 5) * 20;
-      ctx.fillStyle = "red";
-      ctx.beginPath();
-      ctx.arc(px, py, 6, 0, 2 * Math.PI);
-      ctx.fill();
-    }
-  </script>
+  // rótulos en vértices (alineados a sus aristas). DIST pequeño -> compacto
+  vertexLabel(V.left,   3*Math.PI/4, "Laicidad y libertades civiles", 30);              // 1
+  vertexLabel(V.bottom,-3*Math.PI/4, "Confesionalidad y autoritarismo", 30);            // 2
+  vertexLabel(V.bottom, -Math.PI/4,  "Control estatal y privilegios corporativos", 30); // 3
+  vertexLabel(V.right,  Math.PI/4,   "Libre mercado y anticorporativismo", 30);         // 4
+}
+
+// rótulo paralelo a la arista que sale del vértice
+function vertexLabel(v, edgeAngle, text, dist){
+  let ang=edgeAngle, nx=Math.cos(ang-Math.PI/2), ny=Math.sin(ang-Math.PI/2);
+  const x=v.x+nx*dist, y=v.y+ny*dist;
+  if(Math.abs(ang)>Math.PI/2) ang+=Math.PI; // mantener “de pie”
+  ctx.save(); ctx.translate(x,y); ctx.rotate(ang);
+  ctx.font="bold 14px system-ui";
+  const pad=6, w=ctx.measureText(text).width+pad*2, h=22;
+  ctx.fillStyle="#fff"; ctx.strokeStyle="#e5e7eb"; roundRect(-w/2,-h/2,w,h,8); ctx.fill(); ctx.stroke();
+  ctx.fillStyle="#111"; ctx.textAlign="center"; ctx.textBaseline="middle"; ctx.fillText(text,0,0);
+  ctx.restore();
+}
+
+/* ===================== HISTÓRICOS ===================== */
+const historicos=[
+  {name:"Benito Juárez",x:+0.60,y:+0.70},
+  {name:"Melchor Ocampo",x:+0.70,y:+0.60},
+  {name:"Ponciano Arriaga",x:+0.65,y:+0.55},
+  {name:"Ignacio Comonfort",x:-0.20,y:+0.45},
+  {name:"S. Lerdo de Tejada",x:-0.10,y:+0.50},
+  {name:"Maximiliano",x:+0.35,y:-0.30},
+  {name:"Lucas Alamán",x:-0.65,y:-0.40},
+  {name:"Arz. Labastida",x:-0.70,y:-0.60}
+];
+
+// posicionador compacto de nombres (elige la mejor de 8 posiciones cercanas)
+const taken=[];
+const overlap=(a,b)=>!(a.x+a.w<=b.x||b.x+b.w<=a.x||a.y+a.h<=b.y||b.y+b.h<=a.y);
+function placeName(text, px, py){
+  ctx.font="13px system-ui";
+  const pad=6, w=ctx.measureText(text).width+pad*2+8, h=20;
+  const opts=[
+    {x:px+10,   y:py-h/2},   {x:px+10,   y:py-h-4},   {x:px+10,   y:py+4},
+    {x:px-w-10,y:py-h/2},   {x:px-w-10,y:py-h-4},   {x:px-w-10,y:py+4},
+    {x:px-w/2, y:py-h-8},   {x:px-w/2, y:py+8}
+  ];
+  let rect=null;
+  for(const o of opts){
+    const rct={x:o.x,y:o.y,w,h};
+    if(!taken.some(t=>overlap(t,rct))){rect=rct;break;}
+  }
+  if(!rect){rect={x:px+10,y:py-h/2,w,h};}
+  taken.push(rect);
+  ctx.fillStyle="#fff"; ctx.strokeStyle="#e5e7eb"; roundRect(rect.x,rect.y,rect.w,rect.h,7); ctx.fill(); ctx.stroke();
+  ctx.fillStyle="#0b3a70"; ctx.textAlign="left"; ctx.textBaseline="middle";
+  ctx.fillText(text, rect.x+pad, rect.y+rect.h/2);
+}
+function drawPeople(){
+  taken.length=0;
+  historicos.forEach(h=>{
+    const {px,py}=project(h.x,h.y);
+    ctx.fillStyle="var(--pt)"; ctx.beginPath(); ctx.arc(px,py,5,0,Math.PI*2); ctx.fill();
+    placeName(h.name, px, py);
+  });
+}
+
+/* ===================== CUESTIONARIO → PUNTO ===================== */
+function resetForm(){
+  document.getElementById('quizForm').reset();
+  document.getElementById('result').innerText="Contesta todo y presiona “Ver resultado”.";
+  base(); drawPeople();
+}
+function calculate(){
+  let ySum=0,xSum=0;
+  for(let i=0;i<10;i++){
+    const y=document.querySelector(`input[name='y${i}']:checked`);
+    const x=document.querySelector(`input[name='x${i}']:checked`);
+    if(!y||!x){alert("Faltan respuestas en alguna fila.");return;}
+    ySum+=+y.value; xSum+=+x.value;
+  }
+  const yN=(ySum-15)/10, xN=(xSum-15)/10; // 5..25 → -1..1
+  document.getElementById('result').innerText=
+    `Coordenadas: Y=${ySum.toFixed(1)} (→ ${yN.toFixed(2)}),  X=${xSum.toFixed(1)} (→ ${xN.toFixed(2)})`;
+  base(); drawPeople();
+  // dibuja tu punto
+  const {px,py}=project(xN,yN);
+  ctx.fillStyle="rgba(225,29,72,.18)"; ctx.beginPath(); ctx.arc(px,py,12,0,Math.PI*2); ctx.fill();
+  ctx.fillStyle="var(--me)"; ctx.beginPath(); ctx.arc(px,py,6,0,Math.PI*2); ctx.fill();
+  // etiqueta pequeña
+  ctx.font="12px system-ui"; const lab=`(${xN.toFixed(2)}, ${yN.toFixed(2)})`;
+  ctx.fillStyle="#111"; ctx.textAlign="left"; ctx.fillText(lab, px+10, py-10);
+}
+function downloadPNG(){
+  const a=document.createElement('a'); a.download='nolan-1857-1867.png';
+  a.href=document.getElementById('graph').toDataURL('image/png'); a.click();
+}
+
+/* ===================== RENDER INICIAL ===================== */
+base(); drawPeople();
+</script>
 </body>
 </html>
